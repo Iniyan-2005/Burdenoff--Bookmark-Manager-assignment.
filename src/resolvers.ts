@@ -8,12 +8,8 @@ export const resolvers = {
     folder: async (_parent: unknown, args: { id: string }, context: GraphQLContext) => {
       return context.folderService.getFolder(args.id);
     },
-    bookmarks: (_parent: unknown, _args: { folderId?: string; search?: string; take?: number; cursor?: string }, _context: GraphQLContext) => {
-      return {
-        nodes: [],
-        endCursor: null,
-        hasNextPage: false,
-      };
+    bookmarks: async (_parent: unknown, args: { folderId?: string; search?: string; take?: number; cursor?: string }, context: GraphQLContext) => {
+      return context.bookmarkService.getBookmarks(args);
     },
   },
   Folder: {
@@ -21,11 +17,13 @@ export const resolvers = {
       return context.folderService.getFolderBookmarks(parent.id);
     }
   },
+  Bookmark: {
+    folder: async (parent: { folderId: string }, _args: unknown, context: GraphQLContext) => {
+      return context.folderService.getFolder(parent.folderId);
+    }
+  },
   Mutation: {
-    createFolder: (_parent: unknown,
-      _args: { input: { name: string } },
-      _context: GraphQLContext,
-    ) => {
+    createFolder: (_parent: unknown, _args: { input: { name: string } }, _context: GraphQLContext) => {
       throw new Error("Not implemented");
     },
     createBookmark: (_parent: unknown, _args: { input: { title: string; url: string; tags?: string[]; folderId: string } }, _context: GraphQLContext) => {
