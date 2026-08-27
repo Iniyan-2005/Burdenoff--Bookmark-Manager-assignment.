@@ -47,6 +47,8 @@ cp .env.example .env
 
 ## Running Tests
 We use `bun test` natively. The test suite avoids relying on fake assertions, offering genuine verifications.
+# Run all project quality checks
+bun run sanity
 
 - **Unit Tests**: Employs mocked Prisma contexts to guarantee resolver boundary integrity and validation rejection before reaching the DB.
 - **Integration Tests**: Connects safely to the active PostgreSQL database, spinning up disposable test records to verify complex relational fetches without permanently polluting the development environment.
@@ -58,6 +60,15 @@ We use `bun test` natively. The test suite avoids relying on fake assertions, of
   ```bash
   bun run typecheck
   ```
+  ## CI
+
+GitHub Actions runs automatically on pull requests and performs:
+
+- Dependency installation
+- Prisma Client generation
+- Database migrations
+- TypeScript type checking
+- The complete test suite
 
 ## GraphQL API
 
