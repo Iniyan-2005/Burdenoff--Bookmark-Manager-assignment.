@@ -26,5 +26,12 @@ export class FolderService {
       orderBy: { createdAt: "desc" },
     });
   }
+
+  async createFolder(name: string): Promise<Folder> {
+    return this.prisma.folder.create({
+      data: { name },
+    });
+  }
 }
+
 

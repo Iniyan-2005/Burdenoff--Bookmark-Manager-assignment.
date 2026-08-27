@@ -23,20 +23,20 @@ export const resolvers = {
     }
   },
   Mutation: {
-    createFolder: (_parent: unknown, _args: { input: { name: string } }, _context: GraphQLContext) => {
-      throw new Error("Not implemented");
+    createFolder: async (_parent: unknown, args: { input: { name: string } }, context: GraphQLContext) => {
+      return context.folderService.createFolder(args.input.name);
     },
-    createBookmark: (_parent: unknown, _args: { input: { title: string; url: string; tags?: string[]; folderId: string } }, _context: GraphQLContext) => {
-      throw new Error("Not implemented");
+    createBookmark: async (_parent: unknown, args: { input: { title: string; url: string; tags?: string[] | null; folderId: string } }, context: GraphQLContext) => {
+      return context.bookmarkService.createBookmark(args.input);
     },
-    updateBookmark: (_parent: unknown, _args: { id: string; input: { title?: string; url?: string; tags?: string[] } }, _context: GraphQLContext) => {
-      throw new Error("Not implemented");
+    updateBookmark: async (_parent: unknown, args: { id: string; input: { title?: string | null; url?: string | null; tags?: string[] | null } }, context: GraphQLContext) => {
+      return context.bookmarkService.updateBookmark(args.id, args.input);
     },
-    deleteBookmark: (_parent: unknown, _args: { id: string }, _context: GraphQLContext) => {
-      throw new Error("Not implemented");
+    deleteBookmark: async (_parent: unknown, args: { id: string }, context: GraphQLContext) => {
+      return context.bookmarkService.deleteBookmark(args.id);
     },
-    moveBookmark: (_parent: unknown, _args: { id: string; folderId: string }, _context: GraphQLContext) => {
-      throw new Error("Not implemented");
+    moveBookmark: async (_parent: unknown, args: { id: string; folderId: string }, context: GraphQLContext) => {
+      return context.bookmarkService.moveBookmark(args.id, args.folderId);
     },
   },
 };
