@@ -1,5 +1,5 @@
 import { PrismaClient, Folder } from "@prisma/client";
-import { GraphQLError } from "graphql";
+import { Errors } from "../errors.js";
 
 export class FolderService {
   constructor(private prisma: PrismaClient) {}
@@ -15,7 +15,7 @@ export class FolderService {
       where: { id },
     });
     if (!folder) {
-      throw new GraphQLError(`Folder with id ${id} not found.`);
+      throw Errors.FOLDER_NOT_FOUND(`Folder with id ${id} not found.`);
     }
     return folder;
   }
@@ -28,10 +28,11 @@ export class FolderService {
   }
 
   async createFolder(name: string): Promise<Folder> {
+    if (!name || name.trim() === "") {
+      throw Errors.INVALID_FOLDER_NAME();
+    }
     return this.prisma.folder.create({
-      data: { name },
+      data: { name: name.trim() },
     });
   }
 }
-
-

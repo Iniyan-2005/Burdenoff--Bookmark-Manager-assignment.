@@ -1,5 +1,5 @@
 import { PrismaClient, Prisma, Bookmark } from "@prisma/client";
-import { GraphQLError } from "graphql";
+import { Errors } from "../errors.js";
 
 function isValidUrl(urlString: string): boolean {
   try {
@@ -46,20 +46,20 @@ export class BookmarkService {
 
   async createBookmark(data: { title: string; url: string; tags?: string[] | null; folderId: string }): Promise<Bookmark> {
     if (!data.title || data.title.trim() === "") {
-      throw new GraphQLError("Bookmark title cannot be empty or whitespace.");
+      throw Errors.INVALID_BOOKMARK_TITLE();
     }
     if (!isValidUrl(data.url)) {
-      throw new GraphQLError("Bookmark URL is malformed or invalid.");
+      throw Errors.INVALID_BOOKMARK_URL();
     }
 
     const folderExists = await this.prisma.folder.findUnique({ where: { id: data.folderId } });
     if (!folderExists) {
-      throw new GraphQLError(`Folder with id ${data.folderId} not found.`);
+      throw Errors.FOLDER_NOT_FOUND(`Folder with id ${data.folderId} not found.`);
     }
 
     return this.prisma.bookmark.create({
       data: {
-        title: data.title,
+        title: data.title.trim(),
         url: data.url,
         tags: data.tags || [],
         folderId: data.folderId,
@@ -70,20 +70,20 @@ export class BookmarkService {
   async updateBookmark(id: string, data: { title?: string | null; url?: string | null; tags?: string[] | null }): Promise<Bookmark> {
     const existing = await this.prisma.bookmark.findUnique({ where: { id } });
     if (!existing) {
-      throw new GraphQLError(`Bookmark with id ${id} not found.`);
+      throw Errors.BOOKMARK_NOT_FOUND(`Bookmark with id ${id} not found.`);
     }
 
     const updateData: Prisma.BookmarkUpdateInput = {};
     if (data.title !== undefined && data.title !== null) {
       if (data.title.trim() === "") {
-        throw new GraphQLError("Bookmark title cannot be empty or whitespace.");
+        throw Errors.INVALID_BOOKMARK_TITLE();
       }
-      updateData.title = data.title;
+      updateData.title = data.title.trim();
     }
     
     if (data.url !== undefined && data.url !== null) {
       if (!isValidUrl(data.url)) {
-        throw new GraphQLError("Bookmark URL is malformed or invalid.");
+        throw Errors.INVALID_BOOKMARK_URL();
       }
       updateData.url = data.url;
     }
@@ -101,7 +101,7 @@ export class BookmarkService {
   async deleteBookmark(id: string): Promise<Bookmark> {
     const existing = await this.prisma.bookmark.findUnique({ where: { id } });
     if (!existing) {
-      throw new GraphQLError(`Bookmark with id ${id} not found.`);
+      throw Errors.BOOKMARK_NOT_FOUND(`Bookmark with id ${id} not found.`);
     }
 
     return this.prisma.bookmark.delete({
@@ -112,12 +112,12 @@ export class BookmarkService {
   async moveBookmark(id: string, folderId: string): Promise<Bookmark> {
     const existingBookmark = await this.prisma.bookmark.findUnique({ where: { id } });
     if (!existingBookmark) {
-      throw new GraphQLError(`Bookmark with id ${id} not found.`);
+      throw Errors.BOOKMARK_NOT_FOUND(`Bookmark with id ${id} not found.`);
     }
 
     const destinationFolder = await this.prisma.folder.findUnique({ where: { id: folderId } });
     if (!destinationFolder) {
-      throw new GraphQLError(`Destination folder with id ${folderId} not found.`);
+      throw Errors.FOLDER_NOT_FOUND(`Destination folder with id ${folderId} not found.`);
     }
 
     return this.prisma.bookmark.update({
