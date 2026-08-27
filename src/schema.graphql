@@ -15,10 +15,14 @@ type Bookmark {
   folder: Folder!
 }
 
-type BookmarkConnection {
-  nodes: [Bookmark!]!
+type PageInfo {
   endCursor: String
   hasNextPage: Boolean!
+}
+
+type BookmarkConnection {
+  nodes: [Bookmark!]!
+  pageInfo: PageInfo!
 }
 
 input CreateFolderInput {

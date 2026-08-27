@@ -32,15 +32,41 @@ export class BookmarkService {
       };
     }
 
-    const nodes = await this.prisma.bookmark.findMany({
+    const takeCount = params.take ?? 50; // default take to 50
+    const takeToFetch = takeCount + 1;
+
+    const findOptions: Prisma.BookmarkFindManyArgs = {
       where,
-      orderBy: { createdAt: "desc" },
-    });
+      orderBy: [
+        { createdAt: "desc" },
+        { id: "desc" }
+      ],
+      take: takeToFetch,
+    };
+
+    if (params.cursor) {
+      findOptions.cursor = { id: params.cursor };
+      findOptions.skip = 1; // Skip the cursor record itself
+    }
+
+    const records = await this.prisma.bookmark.findMany(findOptions);
+
+    let hasNextPage = false;
+    let nodes = records;
+
+    if (records.length > takeCount) {
+      hasNextPage = true;
+      nodes = records.slice(0, takeCount);
+    }
+
+    const endCursor = nodes.length > 0 ? nodes[nodes.length - 1].id : null;
 
     return {
       nodes,
-      endCursor: null,
-      hasNextPage: false,
+      pageInfo: {
+        endCursor,
+        hasNextPage,
+      }
     };
   }
 
