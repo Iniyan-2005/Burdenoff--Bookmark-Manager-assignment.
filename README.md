@@ -16,7 +16,14 @@
 (To be documented)
 
 ## Running tests
-(To be documented)
+We use `bun test` as our test runner.
+- **Unit Tests**: Mocks `PrismaClient` locally to verify resolver behavior and validation boundaries securely.
+- **Integration Tests**: Tests against the active PostgreSQL database instance defined by `DATABASE_URL`. It explicitly provisions labeled test data (e.g. "Integration Test Folder") during testing, and automatically deletes these records upon completion to prevent pollution of the development database.
+
+To run the entire test suite:
+```sh
+bun test
+```
 
 ## GraphQL API documentation
 (To be documented)
